@@ -26,7 +26,7 @@ class Container extends AbstractApi
             'size' => $size,
             'filters' => count($filters) == 0 ? '' : Json::encode($filters)
         ];
-        return $this->get('containers/json', $params);
+        return $this->httpGet('containers/json', $params);
     }
 
     /**
@@ -36,7 +36,7 @@ class Container extends AbstractApi
      */
     public function create($name, $params = [])
     {
-        return $this->post('containers/create?name=' . $name, $params);
+        return $this->httpPost('containers/create?name=' . $name, $params);
     }
 
     /**
@@ -49,7 +49,7 @@ class Container extends AbstractApi
         $params = [
             'size' => $size
         ];
-        return $this->get("containers/{$id}/json", $params);
+        return $this->httpGet("containers/{$id}/json", $params);
     }
 
     /**
@@ -58,7 +58,7 @@ class Container extends AbstractApi
      */
     public function logs($id)
     {
-        return $this->get("containers/{$id}/logs", [
+        return $this->httpGet("containers/{$id}/logs", [
             'stdout' => true,
             'stderr' => true,
         ]);
@@ -70,7 +70,7 @@ class Container extends AbstractApi
      */
     public function stats($id)
     {
-        return $this->get("containers/{$id}/stats", [
+        return $this->httpGet("containers/{$id}/stats", [
             'stream' => false,
         ]);
     }
@@ -81,7 +81,7 @@ class Container extends AbstractApi
      */
     public function start($id)
     {
-        $rs = $this->post("containers/{$id}/start");
+        $rs = $this->httpPost("containers/{$id}/start");
         if ($rs == '') {
             return true;
         }
@@ -94,7 +94,7 @@ class Container extends AbstractApi
      */
     public function stop($id)
     {
-        $rs = $this->post("containers/{$id}/stop");
+        $rs = $this->httpPost("containers/{$id}/stop");
         if ($rs == '') {
             return true;
         }
@@ -107,7 +107,7 @@ class Container extends AbstractApi
      */
     public function restart($id)
     {
-        $rs = $this->post("containers/{$id}/restart");
+        $rs = $this->httpPost("containers/{$id}/restart");
         if ($rs == '') {
             return true;
         }
@@ -121,7 +121,7 @@ class Container extends AbstractApi
      */
     public function rename($id, $newName)
     {
-        $rs = $this->post("containers/{$id}/rename?name={$newName}");
+        $rs = $this->httpPost("containers/{$id}/rename?name={$newName}");
         if ($rs == '') {
             return true;
         }
@@ -134,7 +134,7 @@ class Container extends AbstractApi
      */
     public function pause($id)
     {
-        $rs = $this->post("containers/{$id}/pause");
+        $rs = $this->httpPost("containers/{$id}/pause");
         if ($rs == '') {
             return true;
         }
@@ -147,7 +147,7 @@ class Container extends AbstractApi
      */
     public function unause($id)
     {
-        $rs = $this->post("containers/{$id}/unpause");
+        $rs = $this->httpPost("containers/{$id}/unpause");
         if ($rs == '') {
             return true;
         }
@@ -162,7 +162,7 @@ class Container extends AbstractApi
      */
     public function remove($id, $force = false, $v = false)
     {
-        $rs = $this->delete("containers/{$id}?force={$force}&v=$v");
+        $rs = $this->httpDelete("containers/{$id}?force={$force}&v=$v");
         if ($rs == '') {
             return true;
         }
@@ -180,6 +180,6 @@ class Container extends AbstractApi
         } else {
             $filters = Json::encode($filters);
         }
-        return $this->post('containers/prune?filters=' . $filters);
+        return $this->httpPost('containers/prune?filters=' . $filters);
     }
 }

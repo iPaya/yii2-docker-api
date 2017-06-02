@@ -14,7 +14,7 @@ class System extends AbstractApi
      */
     public function info()
     {
-        return $this->get('info');
+        return $this->httpGet('info');
     }
 
     /**
@@ -22,7 +22,7 @@ class System extends AbstractApi
      */
     public function version()
     {
-        return $this->get('version');
+        return $this->httpGet('version');
     }
 
     /**
@@ -30,7 +30,7 @@ class System extends AbstractApi
      */
     public function ping()
     {
-        return $this->get('_ping');
+        return $this->httpGet('_ping');
     }
 
     /**
@@ -38,6 +38,6 @@ class System extends AbstractApi
      */
     public function df()
     {
-        return $this->get('system/df');
+        return $this->httpGet('system/df');
     }
 }

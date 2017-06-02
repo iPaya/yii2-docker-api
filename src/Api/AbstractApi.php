@@ -31,7 +31,7 @@ class AbstractApi
      * @param array $headers
      * @return mixed
      */
-    public function get($url, $params = [], $headers = [])
+    public function httpGet($url, $params = [], $headers = [])
     {
         return $this->client->get($url, $params, $headers);
     }
@@ -42,7 +42,7 @@ class AbstractApi
      * @param array $headers
      * @return array
      */
-    public function post($url, $data = [], $headers = [])
+    public function httpPost($url, $data = [], $headers = [])
     {
         return $this->client->post($url, $data, $headers);
     }
@@ -53,7 +53,7 @@ class AbstractApi
      * @param array $headers
      * @return array
      */
-    public function delete($url, $data = [], $headers = [])
+    public function httpDelete($url, $data = [], $headers = [])
     {
         return $this->client->delete($url, $data, $headers);
     }

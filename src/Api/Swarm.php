@@ -14,7 +14,7 @@ class Swarm extends AbstractApi
      */
     public function inspect()
     {
-        return $this->get('swarm');
+        return $this->httpGet('swarm');
     }
 
     /**
@@ -23,7 +23,7 @@ class Swarm extends AbstractApi
      */
     public function init($params)
     {
-        return $this->post('swarm/init', $params);
+        return $this->httpPost('swarm/init', $params);
     }
 
     /**
@@ -32,6 +32,6 @@ class Swarm extends AbstractApi
      */
     public function join($params)
     {
-        return $this->post('swarm/join', $params);
+        return $this->httpPost('swarm/join', $params);
     }
 }

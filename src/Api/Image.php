@@ -19,7 +19,7 @@ class Image extends AbstractApi
      */
     public function lists($all = false, $filters = [], $digests = false)
     {
-        return $this->get('images/json', [
+        return $this->httpGet('images/json', [
             'all' => $all,
             'filters' => count($filters) == 0 ? '' : Json::encode($filters),
             'digests' => $digests
@@ -32,6 +32,6 @@ class Image extends AbstractApi
      */
     public function inspect($name)
     {
-        return $this->get("images/{$name}/json");
+        return $this->httpGet("images/{$name}/json");
     }
 }
