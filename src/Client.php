@@ -10,6 +10,7 @@ namespace iPaya\Docker;
 use iPaya\Docker\Api\AbstractApi;
 use iPaya\Docker\Api\Container;
 use iPaya\Docker\Api\Image;
+use iPaya\Docker\Api\Swarm;
 use iPaya\Docker\Api\System;
 use yii\base\Component;
 use yii\base\Exception;
@@ -43,7 +44,7 @@ class Client extends Component
 
     /**
      * @param string $name
-     * @return AbstractApi|Container|Image|System
+     * @return AbstractApi|Container|Image|System|Swarm
      * @throws Exception
      */
     public function api($name)
@@ -57,6 +58,9 @@ class Client extends Component
                 break;
             case 'system':
                 $api = new Api\System($this);
+                break;
+            case 'swarm':
+                $api = new Api\Swarm($this);
                 break;
             default:
                 throw new Exception("错误的 API '{$name}'");
