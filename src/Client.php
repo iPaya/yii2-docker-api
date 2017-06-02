@@ -9,6 +9,7 @@ namespace iPaya\Docker;
 
 use iPaya\Docker\Api\AbstractApi;
 use iPaya\Docker\Api\Container;
+use iPaya\Docker\Api\Image;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
@@ -40,7 +41,7 @@ class Client extends Component
 
     /**
      * @param string $name
-     * @return AbstractApi|Container
+     * @return AbstractApi|Container|Image
      * @throws Exception
      */
     public function api($name)
@@ -48,6 +49,9 @@ class Client extends Component
         switch ($name) {
             case 'container':
                 $api = new Api\Container($this);
+                break;
+            case 'image':
+                $api = new Api\Image($this);
                 break;
             default:
                 throw new Exception("错误的 API '{$name}'");
