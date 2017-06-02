@@ -78,11 +78,23 @@ class Client extends Component
     }
 
     /**
+     * @param string $url
+     * @param array $data
+     * @param array $headers
+     * @return array|mixed
+     */
+    public function delete($url, $data = [], $headers = [])
+    {
+        return $this->request('DELETE', $url, $data, $headers);
+    }
+
+    /**
      * @param string $method
      * @param string $url
      * @param array $data
      * @param array $headers
-     * @return array
+     * @return array|mixed
+     * @throws Exception
      */
     public function request($method, $url, $data = [], $headers = [])
     {
@@ -92,10 +104,12 @@ class Client extends Component
             ->setHeaders($headers)
             ->setMethod($method)
             ->setData($data);
+        if (strtolower($method) == 'post') {
+            $request->setFormat('json');
+        }
         $response = $request->send();
         $result = Json::decode($response->content);
-        echo $request->getFullUrl();
-        if (in_array($response->getStatusCode(), [400, 500])) {
+        if (!$response->getIsOk()) {
             throw new Exception($result['message']);
         }
         return $result;
