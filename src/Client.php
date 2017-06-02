@@ -10,11 +10,13 @@ namespace iPaya\Docker;
 use iPaya\Docker\Api\AbstractApi;
 use iPaya\Docker\Api\Container;
 use iPaya\Docker\Api\Image;
+use iPaya\Docker\Api\System;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\Json;
 use yii\httpclient\Client as HttpClient;
+use yii\httpclient\Response;
 
 class Client extends Component
 {
@@ -41,7 +43,7 @@ class Client extends Component
 
     /**
      * @param string $name
-     * @return AbstractApi|Container|Image
+     * @return AbstractApi|Container|Image|System
      * @throws Exception
      */
     public function api($name)
@@ -53,6 +55,9 @@ class Client extends Component
             case 'image':
                 $api = new Api\Image($this);
                 break;
+            case 'system':
+                $api = new Api\System($this);
+                break;
             default:
                 throw new Exception("错误的 API '{$name}'");
         }
@@ -63,7 +68,7 @@ class Client extends Component
      * @param string $url
      * @param array $data
      * @param array $headers
-     * @return array
+     * @return mixed
      */
     public function get($url, $data = [], $headers = [])
     {
@@ -74,7 +79,7 @@ class Client extends Component
      * @param string $url
      * @param array $data
      * @param array $headers
-     * @return array
+     * @return mixed
      */
     public function post($url, $data = [], $headers = [])
     {
@@ -85,7 +90,7 @@ class Client extends Component
      * @param string $url
      * @param array $data
      * @param array $headers
-     * @return array|mixed
+     * @return mixed
      */
     public function delete($url, $data = [], $headers = [])
     {
@@ -97,7 +102,7 @@ class Client extends Component
      * @param string $url
      * @param array $data
      * @param array $headers
-     * @return array|mixed
+     * @return mixed
      * @throws Exception
      */
     public function request($method, $url, $data = [], $headers = [])
@@ -111,12 +116,7 @@ class Client extends Component
         if (strtolower($method) == 'post') {
             $request->setFormat('json');
         }
-        $response = $request->send();
-        $result = Json::decode($response->content);
-        if (!$response->getIsOk()) {
-            throw new Exception($result['message']);
-        }
-        return $result;
+        return $this->parseResponse($request->send());
     }
 
     /**
@@ -130,5 +130,28 @@ class Client extends Component
             ]);
         }
         return $this->_httpClient;
+    }
+
+    /**
+     * @param Response $response
+     * @return mixed
+     * @throws Exception
+     */
+    public function parseResponse($response)
+    {
+        if ($response->isOk) {
+            try {
+                return Json::decode($response->content);
+            } catch (\Exception $e) {
+                return $response->content;
+            }
+        } else {
+            try {
+                $error = Json::decode($response->content);
+            } catch (\Exception $exception) {
+                $error = ['message' => $response->content];
+            }
+            throw new Exception($error['message']);
+        }
     }
 }

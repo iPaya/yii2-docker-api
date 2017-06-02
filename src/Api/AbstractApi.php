@@ -29,7 +29,7 @@ class AbstractApi
      * @param string $url
      * @param array $params
      * @param array $headers
-     * @return array|mixed
+     * @return mixed
      */
     public function get($url, $params = [], $headers = [])
     {
@@ -57,4 +57,6 @@ class AbstractApi
     {
         return $this->client->delete($url, $data, $headers);
     }
+
+
 }
