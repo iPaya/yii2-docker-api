@@ -127,15 +127,9 @@ class Client extends Component
      */
     public function request($method, $url, $data = [], $headers = [])
     {
-        $url = '/' . $url;
         $httpClient = $this->getSocketClient();
         if (strtolower($method) == 'get') {
-            $pairs = [];
-            foreach ($data as $key => $value) {
-                $pairs[] = "$key=$value";
-            }
-            $queryParams = implode('&', $pairs);
-            $url = $url . '?' . $queryParams;
+            $url = UrlBuilder::buildUri($url, $data);
             $data = null;
         }
         if (strtolower($method) == 'post') {
