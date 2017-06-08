@@ -155,7 +155,7 @@ class Client extends Component
     public function getSocketClient()
     {
         if ($this->_httpClient == null) {
-            $remoteSocket = $this->unixSocket ? ('unix:///' . $this->unixSocket) : ('tcp://' . $this->host . ':' . $this->port);
+            $remoteSocket = $this->unixSocket ? ('unix://' . $this->unixSocket) : ('tcp://' . $this->host . ':' . $this->port);
             $client = new SocketClient($this->messageFactory, [
                 'remote_socket' => $remoteSocket,
 
