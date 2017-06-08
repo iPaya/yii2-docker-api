@@ -7,27 +7,38 @@
 namespace iPaya\Docker;
 
 
+use Http\Client\Common\Plugin\DecoderPlugin;
+use Http\Client\Common\PluginClient;
+use Http\Client\Socket\Client as SocketClient;
+use Http\Message\MessageFactory;
 use iPaya\Docker\Api\AbstractApi;
 use iPaya\Docker\Api\Container;
 use iPaya\Docker\Api\Image;
 use iPaya\Docker\Api\Node;
 use iPaya\Docker\Api\Swarm;
 use iPaya\Docker\Api\System;
+use Psr\Http\Message\ResponseInterface;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\httpclient\Client as HttpClient;
-use yii\httpclient\Response;
 
 class Client extends Component
 {
     public $host;
     public $port;
     public $version = 'v1.26';
+    public $unixSocket;
+    public $connectionTimeout = 3;
+    public $dataTimeout = 3;
+    /**
+     * @var MessageFactory
+     */
+    public $messageFactory;
 
     /**
-     * @var HttpClient
+     * @var SocketClient
      */
     private $_httpClient;
 
@@ -35,11 +46,12 @@ class Client extends Component
     public function init()
     {
         parent::init();
-        if ($this->host == null) {
-            throw new InvalidConfigException('请配置 "host"');
+        $this->messageFactory = new MessageFactory\GuzzleMessageFactory();
+        if ($this->unixSocket == null && $this->host == null) {
+            throw new InvalidConfigException('"unixSocket" 或 "host" 必须设置其中一个.');
         }
-        if ($this->port == null) {
-            throw new InvalidConfigException('请配置 "port"');
+        if ($this->unixSocket == null && $this->host != null && $this->port == null) {
+            throw new InvalidConfigException('使用 "host" 连接 Docker 必须设置端口 "port".');
         }
     }
 
@@ -115,49 +127,66 @@ class Client extends Component
      */
     public function request($method, $url, $data = [], $headers = [])
     {
-        $httpClient = $this->getHttpClient();
-        $request = $httpClient->createRequest()
-            ->setUrl($url)
-            ->setHeaders($headers)
-            ->setMethod($method)
-            ->setData($data);
-        if (strtolower($method) == 'post') {
-            $request->setFormat('json');
+        $url = '/' . $url;
+        $httpClient = $this->getSocketClient();
+        if (strtolower($method) == 'get') {
+            $pairs = [];
+            foreach ($data as $key => $value) {
+                $pairs[] = "$key=$value";
+            }
+            $queryParams = implode('&', $pairs);
+            $url = $url . '?' . $queryParams;
+            $data = null;
         }
-        return $this->parseResponse($request->send());
+        if (strtolower($method) == 'post') {
+            $data = Json::encode($data);
+        }
+        $headers = ArrayHelper::merge([
+            'Host' => $this->version,
+        ], $headers);
+        $request = $this->messageFactory->createRequest($method, $url, $headers, $data);
+        $response = $httpClient->sendRequest($request);
+        return $this->parseResponse($response);
     }
 
     /**
-     * @return HttpClient
+     * @return SocketClient
      */
-    public function getHttpClient()
+    public function getSocketClient()
     {
         if ($this->_httpClient == null) {
-            $this->_httpClient = new HttpClient([
-                'baseUrl' => 'http://' . $this->host . ':' . $this->port . '/' . $this->version,
+            $remoteSocket = $this->unixSocket ? ('unix:///' . $this->unixSocket) : ('tcp://' . $this->host . ':' . $this->port);
+            $client = new SocketClient($this->messageFactory, [
+                'remote_socket' => $remoteSocket,
+
             ]);
+            $plugins[] = new DecoderPlugin();
+            $this->_httpClient = new PluginClient($client, $plugins);
+
         }
         return $this->_httpClient;
     }
 
     /**
-     * @param Response $response
+     * @param ResponseInterface $response
      * @return mixed
      * @throws Exception
      */
     public function parseResponse($response)
     {
-        if ($response->isOk) {
+        $body = $response->getBody();
+        $content = $body->getContents();
+        if ($response->getStatusCode() == '200') {
             try {
-                return Json::decode($response->content);
+                return Json::decode($content);
             } catch (\Exception $e) {
-                return $response->content;
+                return $content;
             }
         } else {
             try {
-                $error = Json::decode($response->content);
+                $error = Json::decode($content);
             } catch (\Exception $exception) {
-                $error = ['message' => $response->content];
+                $error = ['message' => $content];
             }
             throw new Exception($error['message']);
         }
