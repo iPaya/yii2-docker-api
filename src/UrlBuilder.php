@@ -8,6 +8,7 @@ namespace iPaya\Docker;
 
 
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 class UrlBuilder
 {
@@ -36,6 +37,9 @@ class UrlBuilder
 
         $pairs = [];
         foreach ($params as $name => $value) {
+            if (is_array($value)) {
+                $value = count($value) == 0 ? null : Json::encode($value);
+            }
             $pairs[] = "$name=$value";
         }
         $sections[] = '?' . implode('&', $pairs);

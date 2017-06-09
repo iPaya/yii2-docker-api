@@ -15,6 +15,7 @@ use iPaya\Docker\Api\AbstractApi;
 use iPaya\Docker\Api\Container;
 use iPaya\Docker\Api\Image;
 use iPaya\Docker\Api\Node;
+use iPaya\Docker\Api\Service;
 use iPaya\Docker\Api\Swarm;
 use iPaya\Docker\Api\System;
 use Psr\Http\Message\ResponseInterface;
@@ -57,7 +58,7 @@ class Client extends Component
 
     /**
      * @param string $name
-     * @return AbstractApi|Container|Image|System|Swarm|Node
+     * @return AbstractApi|Container|Image|System|Swarm|Node|Service
      * @throws Exception
      */
     public function api($name)
@@ -77,6 +78,9 @@ class Client extends Component
                 break;
             case 'node':
                 $api = new Api\Node($this);
+                break;
+            case 'service':
+                $api = new Api\Service($this);
                 break;
             default:
                 throw new Exception("错误的 API '{$name}'");
