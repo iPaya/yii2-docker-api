@@ -141,7 +141,12 @@ class Client extends Component
             $data = null;
         }
         if (strtolower($method) == 'post') {
-            $data = Json::encode($data);
+            $url = UrlBuilder::buildUri($url, []);
+            if (count($data) > 0) {
+                $data = Json::encode($data);
+            } else {
+                $data = null;
+            }
         }
         $headers = ArrayHelper::merge([
             'Host' => $this->version,
@@ -178,7 +183,7 @@ class Client extends Component
     {
         $body = $response->getBody();
         $content = $body->getContents();
-        if ($response->getStatusCode() == '200') {
+        if (substr($response->getStatusCode(), 0, 2) == '20') {
             try {
                 return Json::decode($content);
             } catch (\Exception $e) {
