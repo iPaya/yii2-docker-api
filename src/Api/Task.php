@@ -7,7 +7,7 @@
 namespace iPaya\Docker\Api;
 
 
-class Service extends AbstractApi
+class Task extends AbstractApi
 {
     /**
      * @param array $filters
@@ -15,7 +15,7 @@ class Service extends AbstractApi
      */
     public function lists($filters = [])
     {
-        return $this->httpGet('services', ['filters' => $filters]);
+        return $this->httpGet('/tasks', ['filters' => $filters]);
     }
 
     /**
@@ -24,6 +24,6 @@ class Service extends AbstractApi
      */
     public function inspect($id)
     {
-        return $this->httpGet("services/{$id}");
+        return $this->httpGet("/tasks/{$id}");
     }
 }

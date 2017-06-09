@@ -18,6 +18,7 @@ use iPaya\Docker\Api\Node;
 use iPaya\Docker\Api\Service;
 use iPaya\Docker\Api\Swarm;
 use iPaya\Docker\Api\System;
+use iPaya\Docker\Api\Task;
 use Psr\Http\Message\ResponseInterface;
 use yii\base\Component;
 use yii\base\Exception;
@@ -58,7 +59,7 @@ class Client extends Component
 
     /**
      * @param string $name
-     * @return AbstractApi|Container|Image|System|Swarm|Node|Service
+     * @return AbstractApi|Container|Image|System|Swarm|Node|Service|Task
      * @throws Exception
      */
     public function api($name)
@@ -81,6 +82,9 @@ class Client extends Component
                 break;
             case 'service':
                 $api = new Api\Service($this);
+                break;
+            case 'task':
+                $api = new Api\Task($this);
                 break;
             default:
                 throw new Exception("错误的 API '{$name}'");
